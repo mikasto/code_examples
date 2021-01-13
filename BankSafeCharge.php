@@ -193,25 +193,25 @@ class BankSafeCharge extends BankModule implements IBank
         }
         $responce_json = json_decode($responce, true);
 
-        if ($this->assertArrayValue($responce_json, 'transactionId')) {
+        if ($this->checkArrayValue($responce_json, 'transactionId')) {
             $this->bank_unique_id = $responce_json['transactionId'];
         }
 
-        if (!$this->assertArrayValue($responce_json, 'status', 'SUCCESS')
-            &&  !$this->assertArrayValue($responce_json, 'transactionStatus')
+        if (!$this->checkArrayValue($responce_json, 'status', 'SUCCESS')
+            &&  !$this->checkArrayValue($responce_json, 'transactionStatus')
         ) {
             return $this->exitError('Processing error', '001');
         }
 
-        if (!$this->assertArrayValue($responce_json, 'paymentOption.card.threeD.eci', '7')) {
+        if (!$this->checkArrayValue($responce_json, 'paymentOption.card.threeD.eci', '7')) {
             return $this->exitError('Payment authentication was not performed', '005');
         }
 
         // 3d 2.0 approved
         if ($this->threeDv2
-            &&  $this->assertArrayValue($responce_json, 'transactionStatus', 'APPROVED')
-            &&  (!$this->assertArrayValue($responce_json, 'paymentOption.card.threeD.result')
-                ||  !$this->assertArrayValue($responce_json, 'paymentOption.card.threeD.result', 'N'))
+            &&  $this->checkArrayValue($responce_json, 'transactionStatus', 'APPROVED')
+            &&  (!$this->checkArrayValue($responce_json, 'paymentOption.card.threeD.result')
+                ||  !$this->checkArrayValue($responce_json, 'paymentOption.card.threeD.result', 'N'))
         ) {
             $this->data['status'] = 'approved';
             return true;
@@ -219,11 +219,11 @@ class BankSafeCharge extends BankModule implements IBank
 
         // 3d 2.0 fail frictionless
         if ($this->threeDv2
-            &&  $this->assertArrayValue($responce_json, 'transactionStatus', 'APPROVED')
-            &&  $this->assertArrayValue($responce_json, 'paymentOption.card.threeD.result', 'N')
+            &&  $this->checkArrayValue($responce_json, 'transactionStatus', 'APPROVED')
+            &&  $this->checkArrayValue($responce_json, 'paymentOption.card.threeD.result', 'N')
         ) {
             $this->message = '';
-            if ($this->assertArrayValue($responce_json, 'paymentOption.card.threeD.threeDReason')) {
+            if ($this->checkArrayValue($responce_json, 'paymentOption.card.threeD.threeDReason')) {
                 $this->message = $responce_json['paymentOption']['card']['threeD']['threeDReason'];
             }
             return $this->exitError($this->message, '005');
@@ -231,16 +231,16 @@ class BankSafeCharge extends BankModule implements IBank
 
         // no 3d enrolled not approved
         if (!$this->threeDv2
-            &&  $this->assertArrayValue($responce_json, 'transactionStatus', 'APPROVED')
+            &&  $this->checkArrayValue($responce_json, 'transactionStatus', 'APPROVED')
         ) {
             return $this->exitError('No 3d enrolled', '004');
         }
 
         // success 3d
-        if ($this->assertArrayValue($responce_json, 'transactionStatus', 'REDIRECT')
-            &&  $this->assertArrayValue($responce_json, 'paymentOption.card.threeD.acsUrl')
+        if ($this->checkArrayValue($responce_json, 'transactionStatus', 'REDIRECT')
+            &&  $this->checkArrayValue($responce_json, 'paymentOption.card.threeD.acsUrl')
         ) {
-            $this->apply3d($responce_json, $order);
+            $this->apply3d($responce_json, $order, $query);
             return true;
         }
 
@@ -283,7 +283,7 @@ class BankSafeCharge extends BankModule implements IBank
         }
 
         $transaction_data = @unserialize($transaction->data);
-        if (!$this->assertArrayValue($transaction_data, 'query')) {
+        if (!$this->checkArrayValue($transaction_data, 'query')) {
             return $this->exitError('Order data error ', '005');
         }
 
@@ -466,23 +466,23 @@ class BankSafeCharge extends BankModule implements IBank
             return false;
         }
         $responce_json = json_decode($responce, true);
-        if (!$this->assertArrayValue($responce_json, 'status', 'SUCCESS')
-            ||  !$this->assertArrayValue($responce_json, 'transactionStatus', 'APPROVED')
+        if (!$this->checkArrayValue($responce_json, 'status', 'SUCCESS')
+            ||  !$this->checkArrayValue($responce_json, 'transactionStatus', 'APPROVED')
         ) {
             return false;
         }
 
-        if ($this->assertArrayValue($responce_json, 'paymentOption.card.threeD.v2supported', 'true')
-            &&  $this->assertArrayValue($responce_json, 'paymentOption.card.threeD.methodUrl')
-            &&  $this->assertArrayValue($responce_json, 'paymentOption.card.threeD.methodPayload')
-            &&  $this->assertArrayValue($responce_json, 'paymentOption.card.threeD.methodPayload')
+        if ($this->checkArrayValue($responce_json, 'paymentOption.card.threeD.v2supported', 'true')
+            &&  $this->checkArrayValue($responce_json, 'paymentOption.card.threeD.methodUrl')
+            &&  $this->checkArrayValue($responce_json, 'paymentOption.card.threeD.methodPayload')
+            &&  $this->checkArrayValue($responce_json, 'paymentOption.card.threeD.methodPayload')
         ) {
             $this->threeDv2 = true;
         } else {
             $this->threeDv2 = false;
         }
 
-        if ($this->assertArrayValue($responce_json, 'paymentOption.card.threeD.methodUrl')) {
+        if ($this->checkArrayValue($responce_json, 'paymentOption.card.threeD.methodUrl')) {
             if (empty($responce_json['paymentOption']['card']['threeD']['methodUrl'])) {
                 $this->methodCompletionInd = 'U';
             } else {
@@ -590,8 +590,9 @@ class BankSafeCharge extends BankModule implements IBank
     /** Apply 3d responce any version
      * @param $responce_json
      * @param Orders $order
+     * @param $query
      */
-    private function apply3d($responce_json, Orders $order)
+    private function apply3d($responce_json, Orders $order, $query)
     {
         $threeD = $responce_json['paymentOption']['card']['threeD'];
         $this->data['rrn'] = $order->reference_number;
@@ -803,7 +804,7 @@ class BankSafeCharge extends BankModule implements IBank
      * @param string $separator
      * @return bool
      */
-    private function assertArrayValue($arr, $path, $value = null, $separator = '.')
+    private function checkArrayValue($arr, $path, $value = null, $separator = '.')
     {
         if (!is_array($arr)) {
             return false;
