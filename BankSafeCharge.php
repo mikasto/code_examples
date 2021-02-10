@@ -753,6 +753,7 @@ class BankSafeCharge extends BankModule implements IBank
         if (!in_array($order->currency_id, $this->bank_currencies)) {
             return ['message' => 'Terminal currency ' . $order->currency_id . ' not allowed', 'number' => '082'];
         }
+		
         return false;
     }
 
