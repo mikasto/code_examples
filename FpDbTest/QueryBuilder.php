@@ -6,6 +6,10 @@ use FpDbTest\Specifiers\SpecifierReplacer;
 use InvalidArgumentException;
 use mysqli;
 
+/**
+ * Query build class
+ * Uses conditional specifiers in the queries and other simple condifiers with assigned arguments
+ */
 class QueryBuilder
 {
     private mysqli $mysqli;
