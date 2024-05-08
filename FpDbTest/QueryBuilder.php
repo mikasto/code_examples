@@ -1,17 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace FpDbTest;
 
 use FpDbTest\Specifiers\SpecifierReplacer;
 use InvalidArgumentException;
 use mysqli;
 
+/**
+ * Query build class
+ * Uses conditional specifiers in the queries and other simple condifiers with assigned arguments
+ */
 class QueryBuilder
 {
-    private mysqli $mysqli;
-    private mixed $condition_skip_value;
-
-    public function __construct(mysqli $mysqli, mixed $condition_skip_value)
+    public function __construct(private mysqli $mysqli, private mixed $condition_skip_value)
     {
         $this->mysqli = $mysqli;
         $this->condition_skip_value = $condition_skip_value;
@@ -22,12 +25,12 @@ class QueryBuilder
         // works only with a non-associative arrays
         $arg_cnt = 0;
         return preg_replace_callback(
-            '/[^{}]+|{[^}]+}/', // cut query to parts with conditional and not
-            function ($match) use ($args, &$arg_cnt) {
+            pattern: '/[^{}]+|{[^}]+}/', // cut query to parts with conditional and not
+            callback: function ($match) use ($args, &$arg_cnt) {
                 $query_part = $match[0];
                 return $this->buildQueryPart($query_part, $args, $arg_cnt);
             },
-            $query
+            subject: $query
         );
     }
 
@@ -46,8 +49,8 @@ class QueryBuilder
         }
 
         return $this->buildQueryWithSpecifiers(
-            $query_part,
-            array_slice($args, $arg_cnt - $specifiers_count, $specifiers_count),
+            query: $query_part,
+            args: array_slice($args, $arg_cnt - $specifiers_count, $specifiers_count),
         );
     }
 
@@ -69,12 +72,12 @@ class QueryBuilder
         // works only with a non-associative arrays
         $arg_cnt = 0;
         return preg_replace_callback(
-            SpecifierReplacer::getSpecifiersRegex(),
-            function ($match) use ($args, &$arg_cnt) {
+            pattern: SpecifierReplacer::getSpecifiersRegex(),
+            callback: function ($match) use ($args, &$arg_cnt) {
                 $specifier = $match[0];
                 return SpecifierReplacer::replace($specifier, $args[$arg_cnt++], $this->mysqli);
             },
-            $query
+            subject: $query
         );
     }
 }
