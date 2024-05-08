@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FpDbTest;
 
 use FpDbTest\Specifiers\SpecifierReplacer;
+use Generator;
 use InvalidArgumentException;
 use mysqli;
 
@@ -20,7 +21,7 @@ class QueryBuilder
         $this->condition_skip_value = $condition_skip_value;
     }
 
-    final public function buildQuery(string $query, array $args = []): string
+    final public function buildQuery(string $query, array|Generator $args = []): string
     {
         // works only with a non-associative arrays
         $arg_cnt = 0;
@@ -34,7 +35,7 @@ class QueryBuilder
         );
     }
 
-    private function buildQueryPart(string $query_part, array $args, int &$arg_cnt): string
+    private function buildQueryPart(string $query_part, array|Generator $args, int &$arg_cnt): string
     {
         // count specifiers inside the part
         if (!preg_match_all(SpecifierReplacer::getSpecifiersRegex(), $query_part, $matches)) {
@@ -54,7 +55,7 @@ class QueryBuilder
         );
     }
 
-    private function buildQueryWithSpecifiers(string $query, array $args): string
+    private function buildQueryWithSpecifiers(string $query, array|Generator $args): string
     {
         // filters for conditional query
         $is_conditional = str_starts_with($query, '{');
