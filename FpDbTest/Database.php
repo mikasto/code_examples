@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace FpDbTest;
 
@@ -6,16 +7,14 @@ use mysqli;
 
 class Database implements DatabaseInterface
 {
-    private mysqli $mysqli;
-
-    public function __construct(mysqli $mysqli)
+    public function __construct(private mysqli $mysqli)
     {
         $this->mysqli = $mysqli;
     }
 
     public function buildQuery(string $query, array $args = []): string
     {
-        $query_builder = new QueryBuilder($this->mysqli, $this->skip());
+        $query_builder = new QueryBuilder(mysqli: $this->mysqli, condition_skip_value: $this->skip());
         return $query_builder->buildQuery($query, $args);
     }
 
