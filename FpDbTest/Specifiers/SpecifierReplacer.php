@@ -85,7 +85,7 @@ abstract class SpecifierReplacer
             $arg = 'NULL';
         }
 
-        return $arg;
+        return (string)$arg;
     }
 
     public static function getTypesAllowed(): array
