@@ -19,9 +19,7 @@ class Database implements DatabaseInterface
     {
         $query_builder = new QueryBuilderConditional(
             query_replacer: new ReplacerSpecifiers(
-                specifiers_config: new SpecifiersConfigFull(
-                    mysqli: $this->mysqli
-                )
+                specifiers_config: new SpecifiersConfigFull(mysqli: $this->mysqli)
             ),
             skip_value: $this->skip(),
         );
