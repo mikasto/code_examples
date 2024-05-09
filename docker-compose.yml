@@ -13,14 +13,21 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     ports:
-      - 33081:3306
-
+      - 3306:3306
+    networks:
+      -localnetwork
 
   php:
     build:
       context: .
-      dockerfile: php.Dockerfile
+      dockerfile: docker / php / Dockerfile
     ports:
       - 20982:80
     volumes:
       - ./:/app
+    networks:
+      -localnetwork
+
+networks:
+   localnetwork:
+      driver: bridge
