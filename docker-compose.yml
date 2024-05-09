@@ -15,18 +15,18 @@ services:
     ports:
       - 3306:3306
     networks:
-      -localnetwork
+      - localnetwork
 
   php:
     build:
       context: .
-      dockerfile: docker / php / Dockerfile
+      dockerfile: docker/php/Dockerfile
     ports:
       - 20982:80
     volumes:
       - ./:/app
     networks:
-      -localnetwork
+      - localnetwork
 
 networks:
    localnetwork:
