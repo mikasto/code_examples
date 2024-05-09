@@ -6,7 +6,7 @@ services:
     image: mysql:latest
     volumes:
       - ./mysql/:/var/lib/mysql/
-      - ./mysql-init:/docker-entrypoint-initdb.d/:ro
+      - ./docker/mysql:/docker-entrypoint-initdb.d/:ro
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
@@ -14,8 +14,6 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     ports:
       - 3306:3306
-    networks:
-      - localnetwork
 
   php:
     build:
@@ -25,9 +23,3 @@ services:
       - 20982:80
     volumes:
       - ./:/app
-    networks:
-      - localnetwork
-
-networks:
-   localnetwork:
-      driver: bridge
