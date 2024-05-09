@@ -1,9 +1,16 @@
 <?php
 
-namespace FpDbTest\Specifiers;
+declare(strict_types=1);
 
-class ArraySpecifierReplacer extends SpecifierReplacer
+namespace FpDbTest\QueryBuilder\Replacer\SpecifiersConfig\Specifier;
+
+class SpecifierArray extends SpecifierAbstract
 {
+    public function getMask(): string
+    {
+        return '?a';
+    }
+
     public static function getTypesAllowed(): array
     {
         return ['array'];
@@ -30,12 +37,12 @@ class ArraySpecifierReplacer extends SpecifierReplacer
 
         if (is_numeric($key)) {
             // make single value
-            return self::replace('?', $value, $this->mysqli);
+            return (new SpecifierMixed($this->mysqli))->getValue($value);
         }
 
         // make pair with key & value
-        return self::replace('?#', $key, $this->mysqli)
+        return (new SpecifierIdentity($this->mysqli))->getValue($key)
             . ' = '
-            . self::replace('?', $value, $this->mysqli);
+            . (new SpecifierMixed($this->mysqli))->getValue($value);
     }
 }

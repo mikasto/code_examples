@@ -1,9 +1,16 @@
 <?php
 
-namespace FpDbTest\Specifiers;
+declare(strict_types=1);
 
-class IdentitySpecifierReplacer extends SpecifierReplacer
+namespace FpDbTest\QueryBuilder\Replacer\SpecifiersConfig\Specifier;
+
+class SpecifierIdentity extends SpecifierAbstract
 {
+    public function getMask(): string
+    {
+        return '?#';
+    }
+
     public static function getTypesAllowed(): array
     {
         return ['string', 'array'];
@@ -34,12 +41,10 @@ class IdentitySpecifierReplacer extends SpecifierReplacer
 
         if (is_numeric($key)) {
             // make single value
-            return self::replace('?#', $value, $this->mysqli);
+            return $this->getValue($value);
         }
 
         // make pair with key
-        return self::replace('?#', $key, $this->mysqli)
-            . ' = '
-            . self::replace('?', $value, $this->mysqli);
+        return $this->getValue($key) . ' = ' . (new SpecifierMixed($this->mysqli))->getValue($value);
     }
 }

@@ -1,9 +1,16 @@
 <?php
 
-namespace FpDbTest\Specifiers;
+declare(strict_types=1);
 
-class IntegerSpecifierReplacer extends SpecifierReplacer
+namespace FpDbTest\QueryBuilder\Replacer\SpecifiersConfig\Specifier;
+
+class SpecifierInteger extends SpecifierAbstract
 {
+    public function getMask(): string
+    {
+        return '?d';
+    }
+
     public static function getTypesAllowed(): array
     {
         return ['string', 'integer', 'float', 'boolean', 'NULL'];
