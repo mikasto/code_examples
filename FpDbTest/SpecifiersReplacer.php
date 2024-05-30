@@ -9,13 +9,13 @@ use FpDbTest\ReplacerInterface;
 use FpDbTest\Specifiers\SpecifierInterface;
 use FpDbTest\Specifiers\SpecifiersConfigInterface;
 
-class SpecifiersReplacer implements ReplacerInterface
+final class SpecifiersReplacer implements ReplacerInterface
 {
-    final public function __construct(private SpecifiersConfigInterface $specifiers_config)
+    public function __construct(private SpecifiersConfigInterface $specifiers_config)
     {
     }
 
-    final public function countReplaces(string $query): int
+    public function countReplaces(string $query): int
     {
         if (!preg_match_all($this->specifiers_config->getRegex(), $query, $matches)) {
             // part have no specifiers
@@ -24,7 +24,7 @@ class SpecifiersReplacer implements ReplacerInterface
         return count($matches[0]);
     }
 
-    final public function replace(string $query, array $args = []): string
+    public function replace(string $query, array $args = []): string
     {
         $arg_cnt = 0;
         return preg_replace_callback(

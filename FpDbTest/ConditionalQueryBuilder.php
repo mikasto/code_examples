@@ -12,7 +12,7 @@ use InvalidArgumentException;
  * Query build class
  * Uses conditional specifiers in the queries and other simple condifiers with assigned arguments
  */
-class ConditionalQueryBuilder implements QueryBuilderInterface
+final class ConditionalQueryBuilder implements QueryBuilderInterface
 {
     public function __construct(
         private ReplacerInterface $query_replacer,
@@ -20,7 +20,7 @@ class ConditionalQueryBuilder implements QueryBuilderInterface
     ) {
     }
 
-    final public function buildQuery(string $query, array $args = []): string
+    public function buildQuery(string $query, array $args = []): string
     {
         // cut query to parts with conditional and not
         $arg_cnt = 0;
