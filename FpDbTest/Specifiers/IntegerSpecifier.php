@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FpDbTest\Specifiers;
 
-final class IntegerSpecifier extends AbstractSpecifier
+final class IntegerSpecifier extends AbstractSpecifier implements SpecifierInterface
 {
     public function getMask(): string
     {
