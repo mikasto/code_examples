@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace FpDbTest\QueryBuilder\Replacer;
+namespace FpDbTest;
 
 use Exception;
-use FpDbTest\ReplacerInterface;
 use FpDbTest\Specifiers\SpecifierInterface;
 use FpDbTest\Specifiers\SpecifiersConfigInterface;
 

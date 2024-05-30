@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-use FpDbTest\Specifiers\SpecifierInterface;
+namespace FpDbTest\Specifiers;
+
+use mysqli;
 
 abstract class AbstractSpecifier implements SpecifierInterface
 {

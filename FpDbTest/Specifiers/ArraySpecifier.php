@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace FpDbTest\Specifiers;
 
-use AbstractSpecifier;
-
 final class ArraySpecifier extends AbstractSpecifier
 {
     public function getMask(): string

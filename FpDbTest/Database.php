@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace FpDbTest;
 
-use FpDbTest\QueryBuilder\ConditionalQueryBuilder;
-use FpDbTest\QueryBuilder\Replacer\SpecifiersReplacer;
 use FpDbTest\Specifiers\FullSpecifiersConfig;
 use mysqli;
 

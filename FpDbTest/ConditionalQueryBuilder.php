@@ -2,10 +2,8 @@
 
 declare(strict_types=1);
 
-namespace FpDbTest\QueryBuilder;
+namespace FpDbTest;
 
-use FpDbTest\QueryBuilderInterface;
-use FpDbTest\ReplacerInterface;
 use InvalidArgumentException;
 
 /**

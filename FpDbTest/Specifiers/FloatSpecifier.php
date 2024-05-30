@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace FpDbTest\Specifiers;
 
-use AbstractSpecifier;
 use Exception;
 
 final class FloatSpecifier extends AbstractSpecifier
