@@ -2,26 +2,24 @@
 
 declare(strict_types=1);
 
-namespace FpDbTest\QueryBuilder\Replacer\SpecifiersConfig\Specifier;
+namespace FpDbTest\Specifiers;
 
-class SpecifierIdentity extends SpecifierAbstract
+use AbstractSpecifier;
+
+final class ArraySpecifier extends AbstractSpecifier
 {
     public function getMask(): string
     {
-        return '?#';
+        return '?a';
     }
 
     public static function getTypesAllowed(): array
     {
-        return ['string', 'array'];
+        return ['array'];
     }
 
     public function getWrapped(mixed $arg): mixed
     {
-        if (gettype($arg) !== 'array') {
-            return "`$arg`";
-        }
-
         if (!count($arg)) {
             throw new \Exception('Array is empty');
         }
@@ -36,15 +34,17 @@ class SpecifierIdentity extends SpecifierAbstract
     private function getWrappedIteration(mixed $key, mixed $value): string
     {
         if (is_array($value)) {
-            throw new \Exception("Multy inlcluding array");
+            throw new \Exception("Multi including array");
         }
 
         if (is_numeric($key)) {
             // make single value
-            return $this->getValue($value);
+            return (new MixedSpecifier($this->mysqli))->getValue($value);
         }
 
-        // make pair with key
-        return $this->getValue($key) . ' = ' . (new SpecifierMixed($this->mysqli))->getValue($value);
+        // make pair with key & value
+        return (new IdentitySpecifier($this->mysqli))->getValue($key)
+            . ' = '
+            . (new MixedSpecifier($this->mysqli))->getValue($value);
     }
 }

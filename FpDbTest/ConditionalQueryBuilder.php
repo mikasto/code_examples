@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace FpDbTest\QueryBuilder;
 
-use FpDbTest\QueryBuilder\Replacer\ReplacerInterface;
+use FpDbTest\QueryBuilderInterface;
+use FpDbTest\ReplacerInterface;
 use InvalidArgumentException;
 
 /**
  * Query build class
  * Uses conditional specifiers in the queries and other simple condifiers with assigned arguments
  */
-class QueryBuilderConditional implements QueryBuilderInterface
+class ConditionalQueryBuilder implements QueryBuilderInterface
 {
     public function __construct(
         private ReplacerInterface $query_replacer,
@@ -36,7 +37,6 @@ class QueryBuilderConditional implements QueryBuilderInterface
     private function buildQueryPart(string $query_part, array $args, int &$arg_cnt): string
     {
         $need_args_cnt = $this->query_replacer->countReplaces($query_part);
-
 
         $arg_cnt += $need_args_cnt;
         if ($arg_cnt > count($args)) {

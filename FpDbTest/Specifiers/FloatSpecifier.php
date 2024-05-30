@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
-namespace FpDbTest\QueryBuilder\Replacer\SpecifiersConfig\Specifier;
+namespace FpDbTest\Specifiers;
 
-class SpecifierFloat extends SpecifierAbstract
+use AbstractSpecifier;
+use Exception;
+
+final class FloatSpecifier extends AbstractSpecifier
 {
     const int DECIMALS_MAX = 30; // Maximum decimals mysql & mariadb is 38 & 30
 
@@ -21,7 +24,7 @@ class SpecifierFloat extends SpecifierAbstract
     public function getConverted(mixed $arg): mixed
     {
         if (settype($arg, 'float') === false) {
-            throw new \Exception("Error on change type for '$arg' to Float");
+            throw new Exception("Error on change type for '$arg' to Float");
         }
         return $arg;
     }

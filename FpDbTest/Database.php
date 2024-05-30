@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace FpDbTest;
 
-use FpDbTest\QueryBuilder\QueryBuilderConditional;
-use FpDbTest\QueryBuilder\Replacer\ReplacerSpecifiers;
-use FpDbTest\QueryBuilder\Replacer\SpecifiersConfig\SpecifiersConfigFull;
+use FpDbTest\QueryBuilder\ConditionalQueryBuilder;
+use FpDbTest\QueryBuilder\Replacer\SpecifiersReplacer;
+use FpDbTest\Specifiers\FullSpecifiersConfig;
 use mysqli;
 
 class Database implements DatabaseInterface
@@ -17,9 +17,9 @@ class Database implements DatabaseInterface
 
     public function buildQuery(string $query, array $args = []): string
     {
-        $query_builder = new QueryBuilderConditional(
-            query_replacer: new ReplacerSpecifiers(
-                specifiers_config: new SpecifiersConfigFull(mysqli: $this->mysqli)
+        $query_builder = new ConditionalQueryBuilder(
+            query_replacer: new SpecifiersReplacer(
+                specifiers_config: new FullSpecifiersConfig(mysqli: $this->mysqli)
             ),
             skip_value: $this->skip(),
         );

@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace FpDbTest\QueryBuilder\Replacer\SpecifiersConfig\Specifier;
+namespace FpDbTest\Specifiers;
 
-class SpecifierInteger extends SpecifierAbstract
+use AbstractSpecifier;
+
+final class IntegerSpecifier extends AbstractSpecifier
 {
     public function getMask(): string
     {

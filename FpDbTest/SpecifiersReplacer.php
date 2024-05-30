@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace FpDbTest\QueryBuilder\Replacer;
 
 use Exception;
-use FpDbTest\QueryBuilder\Replacer\ReplacerInterface;
-use FpDbTest\QueryBuilder\Replacer\SpecifiersConfig\Specifier\SpecifierInterface;
-use FpDbTest\QueryBuilder\Replacer\SpecifiersConfig\SpecifiersConfigInterface;
+use FpDbTest\ReplacerInterface;
+use FpDbTest\Specifiers\SpecifierInterface;
+use FpDbTest\Specifiers\SpecifiersConfigInterface;
 
-class ReplacerSpecifiers implements ReplacerInterface
+class SpecifiersReplacer implements ReplacerInterface
 {
     final public function __construct(private SpecifiersConfigInterface $specifiers_config)
     {
@@ -40,8 +40,9 @@ class ReplacerSpecifiers implements ReplacerInterface
     private function getSpecifierByMask(string $mask): SpecifierInterface
     {
         foreach ($this->specifiers_config->getList() as $specifier) {
-            if ($specifier->getMask() === $mask)
+            if ($specifier->getMask() === $mask) {
                 return $specifier;
+            }
         }
 
         throw new Exception('Mask not found');
