@@ -8,7 +8,10 @@ use Exception;
 
 final class FloatSpecifier extends AbstractSpecifier implements SpecifierInterface
 {
-    const int DECIMALS_MAX = 30; // Maximum decimals mysql & mariadb is 38 & 30
+    /**
+     * Maximum decimals mysql & mariadb is 38 & 30
+     */
+    const int DECIMALS_MAX = 30;
 
     public function getMask(): string
     {
