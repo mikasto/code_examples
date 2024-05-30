@@ -13,7 +13,7 @@ abstract class AbstractSpecifiersConfig implements SpecifiersConfigInterface
     }
 
     /**
-     * Get Regex string to find all configurated specifiers
+     * Get Regex string to find all configuration specifiers
      *
      * @return string Regex string
      */
@@ -23,7 +23,9 @@ abstract class AbstractSpecifiersConfig implements SpecifiersConfigInterface
             . join(
                 '|',
                 array_map(
-                    callback: fn(SpecifierInterface $specifier): string => addcslashes($specifier->getMask(), '?'),
+                    callback: function (SpecifierInterface $specifier): string {
+                        return addcslashes($specifier->getMask(), '?');
+                    },
                     array: $this->getList()
                 )
             )

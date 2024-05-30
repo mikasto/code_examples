@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace FpDbTest\Specifiers;
 
+use Exception;
+
 final class ArraySpecifier extends AbstractSpecifier implements SpecifierInterface
 {
     public function getMask(): string
@@ -16,10 +18,13 @@ final class ArraySpecifier extends AbstractSpecifier implements SpecifierInterfa
         return ['array'];
     }
 
+    /**
+     * @throws Exception
+     */
     public function getWrapped(mixed $arg): mixed
     {
         if (!count($arg)) {
-            throw new \Exception('Array is empty');
+            throw new Exception('Array is empty');
         }
 
         foreach ($arg as $key => $value) {
@@ -29,10 +34,13 @@ final class ArraySpecifier extends AbstractSpecifier implements SpecifierInterfa
         return join(', ', $arg);
     }
 
+    /**
+     * @throws Exception
+     */
     private function getWrappedIteration(mixed $key, mixed $value): string
     {
         if (is_array($value)) {
-            throw new \Exception("Multi including array");
+            throw new Exception("Multi including array");
         }
 
         if (is_numeric($key)) {
