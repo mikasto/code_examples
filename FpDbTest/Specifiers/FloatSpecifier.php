@@ -11,7 +11,7 @@ final class FloatSpecifier extends AbstractSpecifier implements SpecifierInterfa
     /**
      * Maximum decimals mysql & mariadb is 38 & 30
      */
-    const int DECIMALS_MAX = 30;
+    public const int DECIMALS_MAX = 30;
 
     public function getMask(): string
     {
