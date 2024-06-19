@@ -4,39 +4,36 @@ declare(strict_types=1);
 
 namespace FpDbTest\Specifiers;
 
-use Exception;
+use InvalidArgumentException;
 
 final class FloatSpecifier extends AbstractSpecifier implements SpecifierInterface
 {
+    public const MASK = '?f';
+    public const TYPES_ALLOWED = ['string', 'integer', 'float', 'boolean', 'NULL'];
     /**
-     * Maximum decimals mysql & mariadb is 38 & 30
+     * Maximum decimals mysql & mariadb is 38 & 30. We use 30 for best way
      */
     public const int DECIMALS_MAX = 30;
-
-    public function getMask(): string
-    {
-        return '?f';
-    }
-
-    public static function getTypesAllowed(): array
-    {
-        return ['string', 'integer', 'float', 'boolean', 'NULL'];
-    }
 
     public function getConverted(mixed $arg): mixed
     {
         if (settype($arg, 'float') === false) {
-            throw new Exception("Error on change type for '$arg' to Float");
+            throw new InvalidArgumentException("Error on change type for '$arg' to Float");
         }
         return $arg;
     }
 
     public function getWrapped(mixed $arg): mixed
     {
-        return number_format($arg, min(static::DECIMALS_MAX, static::getFloatDecimalsCount($arg)), '.', '');
+        return number_format(
+            num: $arg,
+            decimals: min(self::DECIMALS_MAX, self::getLocaleFloatDecimalsCount($arg)),
+            decimal_separator: '.',
+            thousands_separator: ''
+        );
     }
 
-    private static function getFloatDecimalsCount(mixed $arg): int
+    private static function getLocaleFloatDecimalsCount(mixed $arg): int
     {
         ['decimal_point' => $decimal_point] = localeconv();
         return (int)strpos(strrev($arg), $decimal_point);

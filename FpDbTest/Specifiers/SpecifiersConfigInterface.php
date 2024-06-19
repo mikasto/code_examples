@@ -6,7 +6,5 @@ namespace FpDbTest\Specifiers;
 
 interface SpecifiersConfigInterface
 {
-    public function getRegex(): string;
-
-    public function getList(): array;
+    public function getPrioritySortedSpecifiersList(): array;
 }

@@ -6,7 +6,7 @@ namespace FpDbTest\Specifiers;
 
 final class FullSpecifiersConfig extends AbstractSpecifiersConfig implements SpecifiersConfigInterface
 {
-    public function getList(): array
+    public function getPrioritySortedSpecifiersList(): array
     {
         return [
             new IntegerSpecifier($this->mysqli),

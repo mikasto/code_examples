@@ -4,46 +4,75 @@ declare(strict_types=1);
 
 namespace FpDbTest;
 
-use Exception;
 use FpDbTest\Specifiers\SpecifierInterface;
 use FpDbTest\Specifiers\SpecifiersConfigInterface;
+use InvalidArgumentException;
 
 final class SpecifiersReplacer implements ReplacerInterface
 {
+    private string $specifiers_masks_regex_cache = '';
+
     public function __construct(private SpecifiersConfigInterface $specifiers_config)
     {
     }
 
-    public function countReplaces(string $query): int
+    public function countQueryReplaces(string $query): int
     {
-        if (!preg_match_all($this->specifiers_config->getRegex(), $query, $matches)) {
-            // part have no specifiers
+        if (!preg_match_all($this->getSpecifiersMasksRegexCached(), $query, $matches)) {
             return 0;
         }
         return count($matches[0]);
     }
 
-    public function replace(string $query, array $args = []): string
+    private function getSpecifiersMasksRegexCached()
     {
-        $arg_cnt = 0;
+        if (empty($this->specifiers_masks_regex_cache)) {
+            $this->specifiers_masks_regex_cache = $this->getSpecifiersMasksRegex();
+        }
+        return $this->specifiers_masks_regex_cache;
+    }
+
+    private function getSpecifiersMasksRegex()
+    {
+        $specifiers = $this->specifiers_config->getPrioritySortedSpecifiersList();
+        $specifiers_slashed_masks = array_map(
+            callback: static function (SpecifierInterface $specifier): string {
+                return addcslashes($specifier::MASK, '?');
+            },
+            array: $specifiers
+        );
+        return '/' . join('|', $specifiers_slashed_masks) . '/';
+    }
+
+    public function replaceQueryArgs(string $query, array $args = []): string
+    {
         return preg_replace_callback(
-            pattern: $this->specifiers_config->getRegex(),
-            callback: function ($matches) use ($args, &$arg_cnt) {
-                $specifier_mask = $matches[0];
-                return $this->getSpecifierByMask($specifier_mask)->getValue($args[$arg_cnt++]);
+            pattern: $this->getSpecifiersMasksRegexCached(),
+            callback: function ($specifier_matches) use (&$args, $query) {
+                $specifier_mask = $specifier_matches[0];
+                $this->validateQueryArgumentsCount($query, $args);
+                $arg = array_shift($args);
+                return $this->getSpecifierByMask($specifier_mask)->getValue($arg);
             },
             subject: $query
         );
     }
 
+    private function validateQueryArgumentsCount(string $query, array $args): void
+    {
+        if (!count($args)) {
+            throw new InvalidArgumentException("Arguments for query '$query' not found");
+        }
+    }
+
     private function getSpecifierByMask(string $mask): SpecifierInterface
     {
-        foreach ($this->specifiers_config->getList() as $specifier) {
-            if ($specifier->getMask() === $mask) {
+        foreach ($this->specifiers_config->getPrioritySortedSpecifiersList() as $specifier) {
+            if ($specifier::MASK === $mask) {
                 return $specifier;
             }
         }
 
-        throw new Exception('Mask not found');
+        throw new InvalidArgumentException("Not found specifier by mask '$mask'");
     }
 }

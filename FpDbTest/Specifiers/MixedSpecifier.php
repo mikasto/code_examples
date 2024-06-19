@@ -6,8 +6,6 @@ namespace FpDbTest\Specifiers;
 
 final class MixedSpecifier extends AbstractSpecifier implements SpecifierInterface
 {
-    public function getMask(): string
-    {
-        return '?';
-    }
+    public const MASK = '?';
+    public const TYPES_ALLOWED = ['string', 'integer', 'float', 'boolean', 'NULL'];
 }

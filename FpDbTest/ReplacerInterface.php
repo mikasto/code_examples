@@ -6,7 +6,7 @@ namespace FpDbTest;
 
 interface ReplacerInterface
 {
-    public function countReplaces(string $query): int;
+    public function countQueryReplaces(string $query): int;
 
-    public function replace(string $query, array $args = []): string;
+    public function replaceQueryArgs(string $query, array $args = []): string;
 }

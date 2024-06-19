@@ -4,27 +4,17 @@ declare(strict_types=1);
 
 namespace FpDbTest\Specifiers;
 
-use Exception;
+use InvalidArgumentException;
 
 final class ArraySpecifier extends AbstractSpecifier implements SpecifierInterface
 {
-    public function getMask(): string
-    {
-        return '?a';
-    }
+    public const MASK = '?a';
+    public const TYPES_ALLOWED = ['array'];
 
-    public static function getTypesAllowed(): array
-    {
-        return ['array'];
-    }
-
-    /**
-     * @throws Exception
-     */
     public function getWrapped(mixed $arg): mixed
     {
         if (!count($arg)) {
-            throw new Exception('Array is empty');
+            throw new InvalidArgumentException('Array is empty');
         }
 
         foreach ($arg as $key => $value) {
@@ -34,23 +24,23 @@ final class ArraySpecifier extends AbstractSpecifier implements SpecifierInterfa
         return join(', ', $arg);
     }
 
-    /**
-     * @throws Exception
-     */
     private function getWrappedIteration(mixed $key, mixed $value): string
     {
         if (is_array($value)) {
-            throw new Exception("Multi including array");
+            throw new InvalidArgumentException("Multi including array at the key: $key");
         }
 
         if (is_numeric($key)) {
-            // make single value
             return (new MixedSpecifier($this->mysqli))->getValue($value);
         }
 
-        // make pair with key & value
-        return (new IdentitySpecifier($this->mysqli))->getValue($key)
+        return $this->getIdentityAndMixedPair($key, $value);
+    }
+
+    private function getIdentityAndMixedPair($identity_arg, $mixed_arg): string
+    {
+        return (new IdentitySpecifier($this->mysqli))->getValue($identity_arg)
             . ' = '
-            . (new MixedSpecifier($this->mysqli))->getValue($value);
+            . (new MixedSpecifier($this->mysqli))->getValue($mixed_arg);
     }
 }

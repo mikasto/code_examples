@@ -19,7 +19,7 @@ class Database implements DatabaseInterface
             query_replacer: new SpecifiersReplacer(
                 specifiers_config: new FullSpecifiersConfig(mysqli: $this->mysqli)
             ),
-            skip_value: $this->skip(),
+            arg_value_to_skip_condition_part: $this->skip(),
         );
         return $query_builder->buildQuery($query, $args);
     }

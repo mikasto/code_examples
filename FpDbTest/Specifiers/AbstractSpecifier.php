@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace FpDbTest\Specifiers;
 
+use InvalidArgumentException;
 use mysqli;
 
 abstract class AbstractSpecifier implements SpecifierInterface
@@ -12,35 +13,21 @@ abstract class AbstractSpecifier implements SpecifierInterface
     {
     }
 
-    public static function getTypesAllowed(): array
-    {
-        return ['string', 'integer', 'float', 'boolean', 'NULL'];
-    }
-
     final public function getValue(mixed $arg): string
     {
-        $type = gettype($arg);
-
-        // type check
-        if (!in_array($type, static::getTypesAllowed())) {
-            throw new \Exception("Invalid argument type '$type' for " . get_called_class());
+        $arg_type = gettype($arg);
+        if (!in_array($arg_type, static::TYPES_ALLOWED)) {
+            throw new InvalidArgumentException("Invalid argument type '$arg_type' for " . get_called_class());
         }
 
-        // replace boolean type to integer
-        if ($type === 'boolean') {
+        if ($arg_type === 'boolean') {
             $arg = (int)$arg;
         }
 
-        // convert type
         $arg = $this->getConverted($arg);
-
-        // escape
         $arg = $this->getEscaped($arg);
-
-        // use wrappers
         $arg = $this->getWrapped($arg);
 
-        // replace nulls
         if (gettype($arg) === 'NULL') {
             $arg = 'NULL';
         }

@@ -6,62 +6,62 @@ namespace FpDbTest;
 
 use InvalidArgumentException;
 
-/**
- * Query build class
- * Uses conditional specifiers in the queries and other simple condifiers with assigned arguments
- */
 final class ConditionalQueryBuilder implements QueryBuilderInterface
 {
     public function __construct(
         private ReplacerInterface $query_replacer,
-        private mixed $skip_value = null,
+        private mixed $arg_value_to_skip_condition_part = null,
     ) {
     }
 
     public function buildQuery(string $query, array $args = []): string
     {
-        // cut query to parts with conditional and not
-        $arg_cnt = 0;
         return preg_replace_callback(
-            pattern: '/[^{}]+|{[^}]+}/',
-            callback: function ($matches) use ($args, &$arg_cnt) {
-                $query_part = $matches[0];
-                return $this->buildQueryPart($query_part, $args, $arg_cnt);
+            pattern: '/[^{}]+|{[^}]+}/', // cut it to parts with conditional "..{...}.." and not "..."
+            callback: function ($query_parts_matches) use (&$args) {
+                $query_part = $query_parts_matches[0];
+                $args_part = $this->getPartOfArgsByQuery(query_part: $query_part, args: $args);
+                $args = array_slice(array: $args, offset: count($args_part));
+                return $this->buildQueryPart(query_part: $query_part, args_part: $args_part);
             },
             subject: $query
         );
     }
 
-    private function buildQueryPart(string $query_part, array $args, int &$arg_cnt): string
+    private function getPartOfArgsByQuery(string $query_part, array $args): array
     {
-        $need_args_cnt = $this->query_replacer->countReplaces($query_part);
-
-        $arg_cnt += $need_args_cnt;
-        if ($arg_cnt > count($args)) {
-            throw new InvalidArgumentException("Not valid arguments count " . count($args));
+        $part_args_cnt = $this->query_replacer->countQueryReplaces($query_part);
+        if ($part_args_cnt > count($args)) {
+            throw new InvalidArgumentException(
+                "Not valid arguments count " . count($args) . " to: $query_part"
+            );
         }
 
-        return $this->buildQueryConditional(
-            query: $query_part,
-            args: array_slice($args, $arg_cnt - $need_args_cnt, $need_args_cnt),
-        );
+        return array_slice($args, 0, $part_args_cnt);
     }
 
-    private function buildQueryConditional(string $query, array $args): string
+    private function buildQueryPart(string $query_part, array $args_part): string
     {
-        // filters for conditional query
-        $is_conditional = str_starts_with($query, '{') && str_ends_with($query, '}');
-        if ($is_conditional && in_array($this->skip_value, $args)) {
+        if ($this->isConditionalQueryPart($query_part)) {
+            return $this->buildConditionalQueryPart(query_part: $query_part, args_part: $args_part);
+        }
+        return $this->query_replacer->replaceQueryArgs(query: $query_part, args: $args_part);
+    }
+
+    private function isConditionalQueryPart(string $query_part): bool
+    {
+        return str_starts_with($query_part, '{') && str_ends_with($query_part, '}');
+    }
+
+    private function buildConditionalQueryPart(string $query_part, array $args_part): string
+    {
+        if (in_array($this->arg_value_to_skip_condition_part, $args_part)) {
             return '';
         }
-        if ($is_conditional) {
-            $query = str_replace(['{', '}'], '', $query);
+        if (!count($args_part)) {
+            return $query_part;
         }
-
-        if (!count($args)) {
-            return $query;
-        }
-
-        return $this->query_replacer->replace($query, $args);
+        $query_part = str_replace(['{', '}'], '', $query_part);
+        return $this->query_replacer->replaceQueryArgs(query: $query_part, args: $args_part);
     }
 }

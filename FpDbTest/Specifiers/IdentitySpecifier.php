@@ -4,26 +4,21 @@ declare(strict_types=1);
 
 namespace FpDbTest\Specifiers;
 
+use InvalidArgumentException;
+
 final class IdentitySpecifier extends AbstractSpecifier implements SpecifierInterface
 {
-    public function getMask(): string
-    {
-        return '?#';
-    }
+    public const MASK = '?#';
+    public const TYPES_ALLOWED = ['string', 'array'];
 
-    public static function getTypesAllowed(): array
-    {
-        return ['string', 'array'];
-    }
-
-    public function getWrapped(mixed $arg): mixed
+    public function getWrapped(mixed $arg): string
     {
         if (gettype($arg) !== 'array') {
             return "`$arg`";
         }
 
         if (!count($arg)) {
-            throw new \Exception('Array is empty');
+            throw new InvalidArgumentException('Array is empty');
         }
 
         foreach ($arg as $key => $value) {
@@ -36,15 +31,13 @@ final class IdentitySpecifier extends AbstractSpecifier implements SpecifierInte
     private function getWrappedIteration(mixed $key, mixed $value): string
     {
         if (is_array($value)) {
-            throw new \Exception("Multy inlcluding array");
+            throw new InvalidArgumentException("Multy inlcluding array");
         }
 
         if (is_numeric($key)) {
-            // make single value
             return $this->getValue($value);
         }
 
-        // make pair with key
         return $this->getValue($key) . ' = ' . (new MixedSpecifier($this->mysqli))->getValue($value);
     }
 }
