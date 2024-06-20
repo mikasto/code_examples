@@ -8,11 +8,13 @@ use InvalidArgumentException;
 
 final class ArraySpecifier extends AbstractSpecifier implements SpecifierInterface
 {
-    public const MASK = '?a';
     public const TYPES_ALLOWED = ['array'];
 
-    public function getWrapped(mixed $arg): mixed
+    public function getWrapped(mixed $arg): string
     {
+        if (!is_array($arg)) {
+            throw new InvalidArgumentException('Array only approved');
+        }
         if (!count($arg)) {
             throw new InvalidArgumentException('Array is empty');
         }
@@ -37,7 +39,7 @@ final class ArraySpecifier extends AbstractSpecifier implements SpecifierInterfa
         return $this->getIdentityAndMixedPair($key, $value);
     }
 
-    private function getIdentityAndMixedPair($identity_arg, $mixed_arg): string
+    private function getIdentityAndMixedPair(string $identity_arg, mixed $mixed_arg): string
     {
         return (new IdentitySpecifier($this->mysqli))->getValue($identity_arg)
             . ' = '

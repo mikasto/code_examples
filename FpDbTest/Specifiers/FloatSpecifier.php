@@ -8,12 +8,11 @@ use InvalidArgumentException;
 
 final class FloatSpecifier extends AbstractSpecifier implements SpecifierInterface
 {
-    public const MASK = '?f';
     public const TYPES_ALLOWED = ['string', 'integer', 'float', 'boolean', 'NULL'];
     /**
      * Maximum decimals mysql & mariadb is 38 & 30. We use 30 for best way
      */
-    public const int DECIMALS_MAX = 30;
+    public const DECIMALS_MAX = 30;
 
     public function getConverted(mixed $arg): mixed
     {
@@ -26,8 +25,8 @@ final class FloatSpecifier extends AbstractSpecifier implements SpecifierInterfa
     public function getWrapped(mixed $arg): mixed
     {
         return number_format(
-            num: $arg,
-            decimals: min(self::DECIMALS_MAX, self::getLocaleFloatDecimalsCount($arg)),
+            num: (float)$arg,
+            decimals: min(self::DECIMALS_MAX, self::getLocaleFloatDecimalsCount((string)$arg)),
             decimal_separator: '.',
             thousands_separator: ''
         );

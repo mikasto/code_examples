@@ -6,5 +6,5 @@ namespace FpDbTest;
 
 interface QueryBuilderInterface
 {
-    public function buildQuery(string $query, array $args = []): string;
+    public function buildQuery(string $query, mixed ...$args): string;
 }

@@ -4,20 +4,26 @@ declare(strict_types=1);
 
 namespace FpDbTest;
 
+use BadMethodCallException;
 use InvalidArgumentException;
 
 final class ConditionalQueryBuilder implements QueryBuilderInterface
 {
+    /**
+     * If has conditions like "..{...}.." cut it to parts by separators "{" and "}"
+     */
+    private const CONDITIONAL_PARTS_REGEX = '/[^{}]+|{[^}]+}/';
+
     public function __construct(
         private ReplacerInterface $query_replacer,
         private mixed $arg_value_to_skip_condition_part = null,
     ) {
     }
 
-    public function buildQuery(string $query, array $args = []): string
+    public function buildQuery(string $query, mixed ...$args): string
     {
         return preg_replace_callback(
-            pattern: '/[^{}]+|{[^}]+}/', // cut it to parts with conditional "..{...}.." and not "..."
+            pattern: self::CONDITIONAL_PARTS_REGEX,
             callback: function ($query_parts_matches) use (&$args) {
                 $query_part = $query_parts_matches[0];
                 $args_part = $this->getPartOfArgsByQuery(query_part: $query_part, args: $args);
@@ -25,7 +31,7 @@ final class ConditionalQueryBuilder implements QueryBuilderInterface
                 return $this->buildQueryPart(query_part: $query_part, args_part: $args_part);
             },
             subject: $query
-        );
+        ) ?? throw new BadMethodCallException("Regex string is bad");
     }
 
     private function getPartOfArgsByQuery(string $query_part, array $args): array

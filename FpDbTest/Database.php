@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace FpDbTest;
 
-use FpDbTest\Specifiers\FullSpecifiersConfig;
+use FpDbTest\Specifiers\AllSpecifiersMap;
+use FpDbTest\Specifiers\SpecifiersFactory;
 use mysqli;
 
 class Database implements DatabaseInterface
@@ -15,13 +16,15 @@ class Database implements DatabaseInterface
 
     public function buildQuery(string $query, array $args = []): string
     {
+        $specifiers_factory = new SpecifiersFactory($this->mysqli);
         $query_builder = new ConditionalQueryBuilder(
             query_replacer: new SpecifiersReplacer(
-                specifiers_config: new FullSpecifiersConfig(mysqli: $this->mysqli)
+                mysqli: $this->mysqli,
+                specifiers_map: new AllSpecifiersMap()
             ),
             arg_value_to_skip_condition_part: $this->skip(),
         );
-        return $query_builder->buildQuery($query, $args);
+        return $query_builder->buildQuery($query, ...$args);
     }
 
     public function skip()

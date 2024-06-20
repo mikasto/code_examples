@@ -4,75 +4,73 @@ declare(strict_types=1);
 
 namespace FpDbTest;
 
-use FpDbTest\Specifiers\SpecifierInterface;
-use FpDbTest\Specifiers\SpecifiersConfigInterface;
+use FpDbTest\Specifiers\SpecifiersFactory;
+use FpDbTest\Specifiers\SpecifiersMapInterface;
 use InvalidArgumentException;
+use mysqli;
 
 final class SpecifiersReplacer implements ReplacerInterface
 {
-    private string $specifiers_masks_regex_cache = '';
+    private string $specifiers_masks_regex;
+    private array $specifiers_masks_to_types;
 
-    public function __construct(private SpecifiersConfigInterface $specifiers_config)
+    public function __construct(private mysqli $mysqli, SpecifiersMapInterface $specifiers_map)
     {
+        $this->specifiers_masks_to_types = $specifiers_map::getMasksToTypesByRegexPriority();
     }
 
     public function countQueryReplaces(string $query): int
     {
-        if (!preg_match_all($this->getSpecifiersMasksRegexCached(), $query, $matches)) {
+        if (!preg_match_all($this->getSpecifiersMasksRegex(), $query, $matches)) {
             return 0;
         }
         return count($matches[0]);
     }
 
-    private function getSpecifiersMasksRegexCached()
+    private function getSpecifiersMasksRegex(): string
     {
-        if (empty($this->specifiers_masks_regex_cache)) {
-            $this->specifiers_masks_regex_cache = $this->getSpecifiersMasksRegex();
+        if (empty($this->specifiers_masks_regex)) {
+            $this->specifiers_masks_regex = $this->getSpecifiersMasksRegexNoCache();
         }
-        return $this->specifiers_masks_regex_cache;
+        return $this->specifiers_masks_regex;
     }
 
-    private function getSpecifiersMasksRegex()
+    private function getSpecifiersMasksRegexNoCache(): string
     {
-        $specifiers = $this->specifiers_config->getPrioritySortedSpecifiersList();
-        $specifiers_slashed_masks = array_map(
-            callback: static function (SpecifierInterface $specifier): string {
-                return addcslashes($specifier::MASK, '?');
-            },
-            array: $specifiers
-        );
+        $specifiers_slashed_masks = [];
+        foreach ($this->specifiers_masks_to_types as $mask => $type) {
+            $specifiers_slashed_masks[] = addcslashes($mask, '?');
+        }
         return '/' . join('|', $specifiers_slashed_masks) . '/';
     }
 
     public function replaceQueryArgs(string $query, array $args = []): string
     {
+        $specifier_factory = new SpecifiersFactory($this->mysqli);
+        $specifier_masks_to_types = $this->specifiers_masks_to_types;
         return preg_replace_callback(
-            pattern: $this->getSpecifiersMasksRegexCached(),
-            callback: function ($specifier_matches) use (&$args, $query) {
+            pattern: $this->getSpecifiersMasksRegex(),
+            callback: static function ($specifier_matches) use (
+                &$args,
+                $query,
+                $specifier_factory,
+                $specifier_masks_to_types
+            ) {
                 $specifier_mask = $specifier_matches[0];
-                $this->validateQueryArgumentsCount($query, $args);
+                self::validateQueryArgumentsCount($query, $args);
                 $arg = array_shift($args);
-                return $this->getSpecifierByMask($specifier_mask)->getValue($arg);
+                $specifier_type = $specifier_masks_to_types[$specifier_mask];
+                $specifier = $specifier_factory->getInstanceByType($specifier_type);
+                return $specifier->getValue($arg);
             },
             subject: $query
         );
     }
 
-    private function validateQueryArgumentsCount(string $query, array $args): void
+    private static function validateQueryArgumentsCount(string $query, array $args): void
     {
         if (!count($args)) {
             throw new InvalidArgumentException("Arguments for query '$query' not found");
         }
-    }
-
-    private function getSpecifierByMask(string $mask): SpecifierInterface
-    {
-        foreach ($this->specifiers_config->getPrioritySortedSpecifiersList() as $specifier) {
-            if ($specifier::MASK === $mask) {
-                return $specifier;
-            }
-        }
-
-        throw new InvalidArgumentException("Not found specifier by mask '$mask'");
     }
 }

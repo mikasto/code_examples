@@ -8,12 +8,12 @@ use InvalidArgumentException;
 
 final class IdentitySpecifier extends AbstractSpecifier implements SpecifierInterface
 {
-    public const MASK = '?#';
     public const TYPES_ALLOWED = ['string', 'array'];
 
     public function getWrapped(mixed $arg): string
     {
         if (gettype($arg) !== 'array') {
+            $arg = (string)$arg;
             return "`$arg`";
         }
 
