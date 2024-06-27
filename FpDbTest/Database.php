@@ -15,11 +15,12 @@ final class Database implements DatabaseInterface
 
     public function buildQuery(string $query, array $args = []): string
     {
+        $specifier_replacer = new SpecifiersReplacer(
+            mysqli: $this->mysqli,
+            specifiers_map: new DefaultSpecifiersMap()
+        );
         $query_builder = new ConditionalQueryBuilder(
-            query_replacer: new SpecifiersReplacer(
-                mysqli: $this->mysqli,
-                specifiers_map: new DefaultSpecifiersMap()
-            ),
+            query_replacer: $specifier_replacer,
             arg_value_to_skip_condition_part: $this->skip(),
         );
         return $query_builder->buildQuery($query, ...$args);
