@@ -15,24 +15,38 @@ abstract class AbstractSpecifier implements SpecifierInterface
 
     final public function getValue(mixed $arg): string
     {
+        $this->validateArg($arg);
+        $arg = $this->getConverted($arg);
+        $arg = $this->getEscaped($arg);
+        $arg = $this->getWrapped($arg);
+        $arg = $this->filterBooleanToInt($arg);
+        $arg = $this->filterNullToString($arg);
+
+        return (string)$arg;
+    }
+
+    public function validateArg(mixed $arg)
+    {
         $arg_type = gettype($arg);
         if (!in_array($arg_type, static::TYPES_ALLOWED)) {
             throw new InvalidArgumentException("Invalid argument type '$arg_type' for " . get_called_class());
         }
+    }
 
-        if ($arg_type === 'boolean') {
+    public function filterBooleanToInt(mixed $arg): mixed
+    {
+        if (gettype($arg) === 'boolean') {
             $arg = (int)$arg;
         }
+        return $arg;
+    }
 
-        $arg = $this->getConverted($arg);
-        $arg = $this->getEscaped($arg);
-        $arg = $this->getWrapped($arg);
-
+    public function filterNullToString(mixed $arg): mixed
+    {
         if (gettype($arg) === 'NULL') {
             $arg = 'NULL';
         }
-
-        return (string)$arg;
+        return $arg;
     }
 
     public function getConverted(mixed $arg): mixed
