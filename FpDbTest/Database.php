@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace FpDbTest;
 
 use FpDbTest\Specifiers\AllSpecifiersMap;
-use FpDbTest\Specifiers\SpecifiersFactory;
 use mysqli;
 
 class Database implements DatabaseInterface
@@ -16,7 +15,6 @@ class Database implements DatabaseInterface
 
     public function buildQuery(string $query, array $args = []): string
     {
-        $specifiers_factory = new SpecifiersFactory($this->mysqli);
         $query_builder = new ConditionalQueryBuilder(
             query_replacer: new SpecifiersReplacer(
                 mysqli: $this->mysqli,
