@@ -7,7 +7,7 @@ namespace FpDbTest;
 use FpDbTest\Specifiers\DefaultSpecifiersMap;
 use mysqli;
 
-class Database implements DatabaseInterface
+final class Database implements DatabaseInterface
 {
     public function __construct(private mysqli $mysqli)
     {
