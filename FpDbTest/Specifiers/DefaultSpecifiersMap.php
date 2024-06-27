@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FpDbTest\Specifiers;
 
-final class AllSpecifiersMap implements SpecifiersMapInterface
+final class DefaultSpecifiersMap implements SpecifiersMapInterface
 {
     public static function getMasksToTypesByRegexPriority(): array
     {

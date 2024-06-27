@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace FpDbTest;
 
-use FpDbTest\Specifiers\AllSpecifiersMap;
+use FpDbTest\Specifiers\DefaultSpecifiersMap;
 use mysqli;
 
 class Database implements DatabaseInterface
@@ -18,7 +18,7 @@ class Database implements DatabaseInterface
         $query_builder = new ConditionalQueryBuilder(
             query_replacer: new SpecifiersReplacer(
                 mysqli: $this->mysqli,
-                specifiers_map: new AllSpecifiersMap()
+                specifiers_map: new DefaultSpecifiersMap()
             ),
             arg_value_to_skip_condition_part: $this->skip(),
         );
